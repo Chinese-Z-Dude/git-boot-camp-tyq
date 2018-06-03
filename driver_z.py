@@ -1,4 +1,6 @@
 import argparse
+import time
+import resource
 
 # output format
 # path_to_goal: ['Up', 'Left', 'Left']
@@ -11,6 +13,19 @@ import argparse
 
 # the goal format of the game
 goal = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+class Game:
+
+    nodes_expanded = 0
+    max_search_depth = 0
+
+    def __init__(self, board, path_to_goal, search_depth):
+        self.board = board
+        self.path_to_goal = path_to_goal
+        self.search_depth = search_depth
+        Game.nodes += 1
+        if Game.max_search_depth < search_depth:
+            Game.max_search_depth = search_depth
 
 # moving the blank tile up
 def up(board):
@@ -57,7 +72,17 @@ def right(board):
         return result
 
 # moveset
-moves = {"Up" : up, "Down" : down, "Left" : left, "Right" : right}
+move_func = {"Up" : up, "Down" : down, "Left" : left, "Right" : right}
+moves = ["Up", "Down", "Left", "Right"]
+
+# apply moves to current game
+def apply_moves(game, moves, fringe):
+    for move in moves:
+        new_state = move_func[move](game.board)
+        if new_state not in visited:
+            new_path = list(game.path_to_goal).append(move)
+            new_stage = Game(new_state, new_path, game.search_depth + 1)
+            fringe.append(new_stage)
 
 # compute the manhattan distance
 def manhattan(board):
@@ -73,14 +98,25 @@ def manhattan(board):
             sum += abs(pos / 3 - goal_y)
     return sum
 
+# return in dictionary format
+# result = {
+#         "path_to_goal": [],
+#         "cost_of_path": -1,
+#         "nodes_expanded": 0,
+#         "search_depth:": depth,
+#         "max_search_depth": max_search_depth,
+#         "status": -1    ## -1: no result; 0: duplicate state; 1: goal}
+# }
+
 # bfs for the game
 def bfs(root):
     fringe = list()
     visited = set()
-
-# recursive method for bfs
-def bfs_r(board, fringe, visited):
-
+    start_time = time.time()
+    apply_moves(root, moveset, fringe)
+    result = bfs_r(fringe, visited, 0, 0)
+    running_time = time.time() - start_time
+    max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
 
 # dfs for the game
 def dfs(root):
