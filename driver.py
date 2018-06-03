@@ -117,7 +117,7 @@ def dfs (array):
         current_stage = fringe.pop()
         visited.add(current_stage.to_string())
         if current_stage.array == goal:
-            current_stage.max_search_depth - 1
+            current_stage.max_search_depth -= 1
             return current_stage
         moves = apply_moves(current_stage, moves_dfs)
         for move in moves:
