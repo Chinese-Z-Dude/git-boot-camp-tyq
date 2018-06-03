@@ -1,27 +1,32 @@
 import argparse
 import time
 import resource
+from Queue import PriorityQueue
+from math import sqrt
+
+
+
 class Game:
     nodes_expanded = 0
     max_search_depth = 0
 
-    def _init_(self, array, parent, move, search_depth):
+    def __init__(self, array, parent, move, search_depth):
         self.array = array
         self.parent= parent
         self.move = move
         self.search_depth = search_depth
+        if Game.max_search_depth < search_depth:
+            Game.max_search_depth = search_depth
 
     def to_string(self):
         return ', '.join(str(x) for x in self.array)
 
 goal = [0,1,2,3,4,5,6,7,8]
-move_set = {"Up" : Up, "Down" : Down, "Left" : Left, "Right" : Right}
-moves_bfs = ["Up", "Down", "Left", "Right"]
-moves_dfs = ["Right","Left", "Down","Up"]
+
 
 def Up (array):
     blank = array.index(0)
-    dim = sqrt(len(array))
+    dim = int(sqrt(len(array)))
     if blank < dim:
         return None
     else:
@@ -32,8 +37,8 @@ def Up (array):
 
 def Down (array):
     blank = array.index(0)
-    dim = sqrt(len(array))
-    if blank > [dim * (dim -1) -1]:
+    dim = int(sqrt(len(array)))
+    if blank > dim * (dim -1) -1:
         return None
     else:
         newB = list(array)
@@ -43,7 +48,7 @@ def Down (array):
 
 def Left (array):
     blank = array.index(0)
-    dim = sqrt(len(array))
+    dim = int(sqrt(len(array)))
     if blank % dim == 0:
         return None
     else:
@@ -54,7 +59,7 @@ def Left (array):
 
 def Right (array) :
     blank = array.index(0)
-    dim = sqrt(len(array))
+    dim = int(sqrt(len(array)))
     if blank % dim == (dim -1):
         return None
     else :
@@ -62,6 +67,10 @@ def Right (array) :
         temp = blank + 1
         newB[blank], newB[temp] = newB[temp], newB[blank]
         return newB
+
+move_set = {"Up" : Up, "Down" : Down, "Left" : Left, "Right" : Right}
+moves_bfs = ["Up", "Down", "Left", "Right"]
+moves_dfs = ["Right","Left", "Down","Up"]
 
 def apply_moves(game, moves):
     Game.nodes_expanded += 1
@@ -86,8 +95,8 @@ def manhattan (array):
     return count
 
 def bfs (array):
-    root = Game(array,[],[],0)
-    fringe = list(root)
+    root = Game(array,None,None,0)
+    fringe = [root]
     visited = set()
     while fringe:
         current_stage = fringe.pop(0)
@@ -101,13 +110,14 @@ def bfs (array):
                 fringe.append(move)
 
 def dfs (array):
-    root = Game(array,[],[],0)
-    fringe = list(root)
+    root = Game(array,None,None,0)
+    fringe = [root]
     visited = set()
     while fringe:
         current_stage = fringe.pop()
         visited.add(current_stage.to_string())
         if current_stage.array == goal:
+            current_stage.max_search_depth - 1
             return current_stage
         moves = apply_moves(current_stage, moves_dfs)
         for move in moves:
@@ -118,7 +128,7 @@ def dfs (array):
 
 
 def ast (array):
-    root = Game(array,[],[],0)
+    root = Game(array,None,None,0)
     fringe = PriorityQueue()
     fringe.put(manhattan(root.array),root)
     visited = set()
@@ -133,20 +143,33 @@ def ast (array):
                 visited.add(move.to_string())
                 fringe.put(manhattan(move.array),move)
 
-def construct_path(Game):
+def construct_path(game):
     path = list()
-    while Game:
-        if Game.move:
-            path.append(Game.move)
-            Game = Game.parent
+    while game:
+        if game.move:
+            path.append(game.move)
+        game = game.parent
     path.reverse()
     return path
+
+def is_square(apositiveint):
+    x = apositiveint // 2
+    seen = set([x])
+    while x * x != apositiveint:
+        x = (x + (apositiveint // x)) // 2
+        if x in seen: return False
+        seen.add(x)
+    return True
 
 
 def main():
     test = [1,2,5,3,4,0,6,7,8]
-    result =bfs(test)
+    result =dfs(test)
     path = construct_path(result)
-
+    print "path_to_goal: " + str(path)
+    print "cost_of_path: " + str(len(path))
+    print "nodes_expanded: " + str(Game.nodes_expanded)
+    print "search_depth: " + str(result.search_depth)
+    print "max_search_depth: " + str(Game.max_search_depth)
 
 main()
