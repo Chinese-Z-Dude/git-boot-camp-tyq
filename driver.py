@@ -105,4 +105,26 @@ def dfs (array) :
         visited.add (current_stage.array)
         apply_moves(current_stage, moves_dfs, fringe)
 
-def ats
+def ast_moves(game, moves,priorityQueue) :
+    for move in moves:
+        new_state = move_set[move](game.array)
+        if new_state:
+            new_path = list(game.path_to_goal).append(move)
+            new_stage = Game(new_state, new_path, game.search_depth + 1)
+            priorityQueue.put(new_stage,manhattan(new_stage))
+
+
+def ast (array) :
+    root = Game(array,[],0)
+    Queue= priorityQueue(root)
+    visited = set()
+    while fringe:
+        current_Queue = Queue.get()
+        if current_Queue == goal :
+            return current_Queue
+        else :
+            current_Queue. array in visited
+            continue
+
+        visited.add(cuurent_Queue.array)
+        ast_moves(current_Queue, moves_bfs, Queue)
