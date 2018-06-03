@@ -13,6 +13,10 @@ import resource
 
 # the goal format of the game
 goal = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+# moveset
+move_set = {"Up" : up, "Down" : down, "Left" : left, "Right" : right}
+moves_bfs = ["Up", "Down", "Left", "Right"]
+moves_dfs = moves_bfs.reverse()
 
 class Game:
 
@@ -71,15 +75,11 @@ def right(board):
         result[blank], result[target] = result[target], result[blank]
         return result
 
-# moveset
-move_func = {"Up" : up, "Down" : down, "Left" : left, "Right" : right}
-moves = ["Up", "Down", "Left", "Right"]
-
 # apply moves to current game
 def apply_moves(game, moves, fringe):
     for move in moves:
-        new_state = move_func[move](game.board)
-        if new_state not in visited:
+        new_state = move_set[move](game.board)
+        if new_state:
             new_path = list(game.path_to_goal).append(move)
             new_stage = Game(new_state, new_path, game.search_depth + 1)
             fringe.append(new_stage)
@@ -98,33 +98,33 @@ def manhattan(board):
             sum += abs(pos / 3 - goal_y)
     return sum
 
-# return in dictionary format
-# result = {
-#         "path_to_goal": [],
-#         "cost_of_path": -1,
-#         "nodes_expanded": 0,
-#         "search_depth:": depth,
-#         "max_search_depth": max_search_depth,
-#         "status": -1    ## -1: no result; 0: duplicate state; 1: goal}
-# }
-
 # bfs for the game
-def bfs(root):
-    fringe = list()
+def bfs(board):
+    root = Game(board, [], 0)
+    fringe = list(root)
     visited = set()
-    start_time = time.time()
-    apply_moves(root, moveset, fringe)
-    result = bfs_r(fringe, visited, 0, 0)
-    running_time = time.time() - start_time
-    max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
+    while fringe:
+        current_stage = fringe.pop()
+        if current_stage.board == goal:
+            return current_stage
+        else if current_stage.board in visited:
+            continue
+
+        visited.add(current_stage.board)
+        apply_moves(current_stage, moves, current_stage.search_depth + 1)
+
+
+    # running_time = time.time() - start_time
+    # max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
 
 # dfs for the game
-def dfs(root):
+def dfs(board):
     fringe = list()
     visited = set()
 # a* search for the game
-def ast(root):
+def ast(board):
     fringe = Queue.PriorityQueue()
     visited = set()
 
 def main():
+    
