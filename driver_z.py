@@ -218,7 +218,7 @@ def main():
 
     # input contans wrong board
     elif args[0] == -2:
-        print "in valid puzzle board"
+        print "invalid puzzle board"
 
     board = args[2]
     result = methods[args[1]](board)
