@@ -85,6 +85,7 @@ def apply_moves(game, moves):
 
 def manhattan (array):
     count = 0
+    dim = int(sqrt(len(array)))
     for i in range(0,len(array)):
         if array[i] != 0:
             x = i % dim
@@ -117,7 +118,7 @@ def dfs (array):
         current_stage = fringe.pop()
         visited.add(current_stage.to_string())
         if current_stage.array == goal:
-            current_stage.max_search_depth -= 1
+            Game.max_search_depth -= 1
             return current_stage
         moves = apply_moves(current_stage, moves_dfs)
         for move in moves:
@@ -130,7 +131,7 @@ def dfs (array):
 def ast (array):
     root = Game(array,None,None,0)
     fringe = PriorityQueue()
-    fringe.put(manhattan(root.array),root)
+    fringe.put((manhattan(root.array),root))
     visited = set()
     while fringe:
         current_stage = fringe.get()[1]
@@ -141,7 +142,7 @@ def ast (array):
         for move in moves:
             if move.to_string() not in visited:
                 visited.add(move.to_string())
-                fringe.put(manhattan(move.array),move)
+                fringe.put((manhattan(move.array),move))
 
 def construct_path(game):
     path = list()
@@ -164,7 +165,7 @@ def is_square(apositiveint):
 
 def main():
     test = [1,2,5,3,4,0,6,7,8]
-    result =dfs(test)
+    result =ast(test)
     path = construct_path(result)
     print "path_to_goal: " + str(path)
     print "cost_of_path: " + str(len(path))
