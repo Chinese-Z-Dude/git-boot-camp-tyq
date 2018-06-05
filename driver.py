@@ -4,7 +4,9 @@ import resource
 from Queue import PriorityQueue
 from math import sqrt
 
-
+# the goal format of the game
+goal = [0,1,2,3,4,5,6,7,8]
+array_size = 0
 
 class Game:
     nodes_expanded = 0
@@ -21,9 +23,7 @@ class Game:
     def to_string(self):
         return ', '.join(str(x) for x in self.array)
 
-goal = [0,1,2,3,4,5,6,7,8]
-
-
+# moving the blank tile up
 def Up (array):
     blank = array.index(0)
     dim = int(sqrt(len(array)))
@@ -35,6 +35,7 @@ def Up (array):
         newB[blank], newB[temp] = newB[temp], newB[blank]
         return newB
 
+# moving the blank tile down
 def Down (array):
     blank = array.index(0)
     dim = int(sqrt(len(array)))
@@ -46,6 +47,7 @@ def Down (array):
         newB[blank], newB[temp] = newB[temp], newB[blank]
         return newB
 
+# moving the blank tile left
 def Left (array):
     blank = array.index(0)
     dim = int(sqrt(len(array)))
@@ -57,6 +59,7 @@ def Left (array):
         newB[blank], newB[temp] = newB[temp], newB[blank]
         return newB
 
+# moving the blank tile right
 def Right (array) :
     blank = array.index(0)
     dim = int(sqrt(len(array)))
@@ -68,10 +71,12 @@ def Right (array) :
         newB[blank], newB[temp] = newB[temp], newB[blank]
         return newB
 
+# moveset
 move_set = {"Up" : Up, "Down" : Down, "Left" : Left, "Right" : Right}
 moves_bfs = ["Up", "Down", "Left", "Right"]
 moves_dfs = ["Right","Left", "Down","Up"]
 
+# apply moves to current game
 def apply_moves(game, moves):
     Game.nodes_expanded += 1
     result = list()
@@ -82,7 +87,7 @@ def apply_moves(game, moves):
             result.append(new_stage)
     return result
 
-
+# compute the manhattan distance
 def manhattan (array):
     count = 0
     dim = int(sqrt(len(array)))
@@ -95,6 +100,7 @@ def manhattan (array):
             count += abs(x -x1) +abs(y-y1)
     return count
 
+# bfs for the game
 def bfs (array):
     root = Game(array,None,None,0)
     fringe = [root]
@@ -110,6 +116,7 @@ def bfs (array):
                 visited.add(move.to_string())
                 fringe.append(move)
 
+# dfs for the game
 def dfs (array):
     root = Game(array,None,None,0)
     fringe = [root]
@@ -126,8 +133,7 @@ def dfs (array):
                 visited.add(move.to_string())
                 fringe.append(move)
 
-
-
+# a* search for the game
 def ast (array):
     root = Game(array,None,None,0)
     fringe = PriorityQueue()
@@ -144,6 +150,7 @@ def ast (array):
                 visited.add(move.to_string())
                 fringe.put((manhattan(move.array),move))
 
+# reconstruct path_to_goal
 def construct_path(game):
     path = list()
     while game:
@@ -162,6 +169,26 @@ def is_square(apositiveint):
         seen.add(x)
     return True
 
+def process_args(args):
+    global array_size
+    if args.method not in methods:
+        return (-1, None, None)
+
+    array = [int(x) for x in args.array.split(',')]
+    if not array or not is_square(len(array)) or len(array) != len(set(array)):
+        return (-2, None, None)
+    array_size = int(sqrt(len(array))
+    return (1, args.method, array)
+
+
+# output format
+# path_to_goal: ['Up', 'Left', 'Left']
+# cost_of_path: 3
+# nodes_expanded: 181437
+# search_depth: 3
+# max_search_depth: 66125
+# running_time: 5.01608433
+# max_ram_usage: 4.23940217
 
 def main():
     test = [1,2,5,3,4,0,6,7,8]
