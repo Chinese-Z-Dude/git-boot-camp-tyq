@@ -6,8 +6,8 @@ from Queue import PriorityQueue
 from math import sqrt
 
 # the goal format of the game
-goal = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 board_size = 0
+goal = list()
 
 class Game:
 
@@ -117,9 +117,6 @@ def bfs(board):
                 visited.add(move.to_string())
                 fringe.append(move)
 
-    # running_time = time.time() - start_time
-    # max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
-
 # dfs for the game
 def dfs(board):
     root = Game(board, None, None, 0)
@@ -129,6 +126,7 @@ def dfs(board):
         current_stage = fringe.pop()
         visited.add(current_stage.to_string())
         if current_stage.board == goal:
+            Game.max_search_depth -= 1
             return current_stage
 
         moves = apply_moves(current_stage, moves_dfs)
@@ -174,6 +172,7 @@ def construct_path(end_game):
     path.reverse()
     return path
 
+# check if a number is a perfect square
 def is_square(apositiveint):
     x = apositiveint // 2
     seen = set([x])
@@ -183,16 +182,24 @@ def is_square(apositiveint):
         seen.add(x)
     return True
 
-# process the Argument
+# process the Argument, generating global field
 def process_args(args):
-    global board_size
+    global board_size, goal
+
+    # check if the input method is valid
     if args.method not in methods:
         return (-1, None, None)
 
     board = [int(x) for x in args.board.split(',')]
-    if not board or not is_square(len(board)) or len(board) != len(set(board)):
+
+    # check if the input board is valid
+    if (not board or len(board) < 2 or
+        not is_square(len(board)) or
+        len(board) != len(set(board)) or
+        0 not in board):
         return (-2, None, None)
     board_size = int(sqrt(len(board)))
+    goal = range(0, len(board))
     return (1, args.method, board)
 
 
@@ -215,13 +222,19 @@ def main():
     # input contains wrong method
     if args[0] == -1:
         print "method does not exist"
+        return
 
     # input contans wrong board
     elif args[0] == -2:
         print "invalid puzzle board"
+        return
 
     board = args[2]
     result = methods[args[1]](board)
+    if not result:
+        print "given board has no solution"
+        return
+
     path = construct_path(result)
     running_time = time.time() - start_time
     max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
