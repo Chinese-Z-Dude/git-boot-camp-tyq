@@ -5,7 +5,7 @@ from Queue import PriorityQueue
 from math import sqrt
 
 # the goal format of the game
-goal = [0,1,2,3,4,5,6,7,8]
+goal = []
 array_size = 0
 
 class Game:
@@ -116,7 +116,7 @@ def bfs (array):
                 visited.add(move.to_string())
                 fringe.append(move)
 
-# dfs for the game
+# ]fs for the game
 def dfs (array):
     root = Game(array,None,None,0)
     fringe = [root]
@@ -133,7 +133,8 @@ def dfs (array):
                 visited.add(move.to_string())
                 fringe.append(move)
 
-# a* search for the game
+
+
 def ast (array):
     root = Game(array,None,None,0)
     fringe = PriorityQueue()
@@ -150,7 +151,6 @@ def ast (array):
                 visited.add(move.to_string())
                 fringe.put((manhattan(move.array),move))
 
-# reconstruct path_to_goal
 def construct_path(game):
     path = list()
     while game:
@@ -169,35 +169,63 @@ def is_square(apositiveint):
         seen.add(x)
     return True
 
+# methods
+methods = {"bfs": bfs, "dfs": dfs, "ast": ast}
+
 def process_args(args):
     global array_size
+    global goal
+    goal = range(0, len(array))
     if args.method not in methods:
         return (-1, None, None)
 
     array = [int(x) for x in args.array.split(',')]
-    if not array or not is_square(len(array)) or len(array) != len(set(array)):
+    # check if the input board is valid
+    if (not array or len(array) < 2 or
+        not is_square(len(array)) or
+        len(array) != len(set(array)) or
+        0 not in array):
         return (-2, None, None)
     array_size = int(sqrt(len(array))
     return (1, args.method, array)
 
 
-# output format
-# path_to_goal: ['Up', 'Left', 'Left']
-# cost_of_path: 3
-# nodes_expanded: 181437
-# search_depth: 3
-# max_search_depth: 66125
-# running_time: 5.01608433
-# max_ram_usage: 4.23940217
 
 def main():
-    test = [1,2,5,3,4,0,6,7,8]
-    result =ast(test)
+    start_time = time.time()
+    par = argparse.ArgumentParser()
+    par.add_argument("method")
+    par.add_argument("array")
+    args = process_args(par.parse_args())
+
+    if args[0] == -1:
+        print "method does not exist"
+        return
+
+    # input contans wrong board
+    elif args[0] == -2:
+        print "invalid puzzle board"
+        return
+
+    array = args[2]
+    result = methods[args[1]](array)
+    if not result:
+        print "given board has no solution"
+        return
+
     path = construct_path(result)
+
+    running_time = time.time() - start_time
+    max_ram_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000000
+
     print "path_to_goal: " + str(path)
     print "cost_of_path: " + str(len(path))
     print "nodes_expanded: " + str(Game.nodes_expanded)
     print "search_depth: " + str(result.search_depth)
     print "max_search_depth: " + str(Game.max_search_depth)
+    print "running_time: " + str(running_time)
+    print "max_ram_usage: " + str(max_ram_usage)
 
-main()
+# if called from the terminal, excute main
+if __name__ == '__main__':
+    main()
