@@ -231,6 +231,7 @@ def main():
 
     board = args[2]
     result = methods[args[1]](board)
+    
     if not result:
         print "given board has no solution"
         return
