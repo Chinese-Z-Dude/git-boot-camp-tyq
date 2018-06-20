@@ -56,31 +56,22 @@ class PlayerAI(BaseAI):
         bestScore4 = beta
         for c in cells:
             temp_grid = grid.clone()
-            temp_grid_4 = grid.clone()
             temp_grid.insertTile(c, 2)
-            temp_grid_4.insertTile(c, 4)
-            if bestScore2 >= alpha:
-                score = self.max(temp_grid, depth - 1, alpha, bestScore2, start)[1]
-            if bestScore4 >= alpha:
-                score4 = self.max(temp_grid_4, depth - 1, alpha, bestScore4, start)[1]
-
+            score = self.max(temp_grid, depth - 1, alpha, bestScore2, start)[1]
             if score < bestScore2:
                 bestScore2 = score
-            if score4 < bestScore4:
-                bestScore4 = score4
             # print str(depth) + "bestScoreMin: " + str(bestScore)
-            if time.time() - start >= 0.195:
+            if bestScore2 < alpha or time.time() - start >= 0.195:
                 break
-
-        # for c in cells:
-        #     temp_grid = grid.clone()
-        #     temp_grid.insertTile(c, 4)
-        #     score = self.max(temp_grid, depth - 1, alpha, bestScore4, start)[1]
-        #     if score < bestScore4:
-        #         bestScore4 = score
-        #     # print str(depth) + "bestScoreMin: " + str(bestScore)
-        #     if bestScore4 < alpha or time.time() - start >= 0.195:
-        #         break
+        for c in cells:
+            temp_grid = grid.clone()
+            temp_grid.insertTile(c, 4)
+            score = self.max(temp_grid, depth - 1, alpha, bestScore4, start)[1]
+            if score < bestScore4:
+                bestScore4 = score
+            # print str(depth) + "bestScoreMin: " + str(bestScore)
+            if bestScore4 < alpha or time.time() - start >= 0.195:
+                break
 
         return 0.9 * bestScore2 + 0.1 * bestScore4
 
