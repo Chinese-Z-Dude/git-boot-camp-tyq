@@ -4,6 +4,9 @@ from math import log
 import math
 import time
 
+# there are 3 evaluation function, evaluation2 hold the best result and thus
+# is used for this game agent
+
 Depth = 3
 directionVectors = (UP_VEC, DOWN_VEC, LEFT_VEC, RIGHT_VEC) = ((-1, 0), (1, 0), (0, -1), (0, 1))
 inf = float('inf')
@@ -39,7 +42,7 @@ class PlayerAI(BaseAI):
                 bestScore = score
                 bestMove = m
             # print str(depth) + "bestMoveMax: " + str(bestMove) + "bestScoreMax: " + str(bestScore)
-            if bestScore > beta or time.time() - start >= 0.195:
+            if bestScore > beta or time.time() - start >= 0.2:
                 return bestMove, bestScore
         return bestMove, bestScore
 
@@ -61,7 +64,7 @@ class PlayerAI(BaseAI):
             if score < bestScore2:
                 bestScore2 = score
             # print str(depth) + "bestScoreMin: " + str(bestScore)
-            if bestScore2 < alpha or time.time() - start >= 0.195:
+            if bestScore2 < alpha or time.time() - start >= 0.2:
                 break
         for c in cells:
             temp_grid = grid.clone()
@@ -70,16 +73,16 @@ class PlayerAI(BaseAI):
             if score < bestScore4:
                 bestScore4 = score
             # print str(depth) + "bestScoreMin: " + str(bestScore)
-            if bestScore4 < alpha or time.time() - start >= 0.195:
+            if bestScore4 < alpha or time.time() - start >= 0.2:
                 break
 
         return 0.9 * bestScore2 + 0.1 * bestScore4
 
     # calculate the score of current gird
     def evaluation2(self, grid):
-        smoothWeight = 0.2
-        monoWeight  = 1.5
-        emptyWeight  = 3.0
+        smoothWeight = 0.1
+        monoWeight  = 1.0
+        emptyWeight  = 2.7
         maxWeight    = 1.0
         empty = len(grid.getAvailableCells())
         smoothness = self.smoothness(grid)
@@ -237,25 +240,34 @@ class PlayerAI(BaseAI):
                (adjacent_sum * weight_5)
 
     def evaluation3(self, grid):
-        mask = [[6, 5, 4, 3],
-                [5, 4, 3, 2],
-                [4, 3, 2, 1],
-                [3, 2, 1, 0]]
-        score = 0
-        penalty = 0
+        mask = [[16, 15, 14, 13],
+                [9, 10, 11, 12],
+                [8, 7, 6, 5],
+                [1, 2, 3, 4]]
+        score = float(0)
+        penalty = float(0)
         for x in xrange(grid.size):
             for y in xrange(grid.size):
-                score += grid.getCellValue((x, y)) * mask[x][y]
-
                 pos_value = grid.getCellValue((x, y))
+                if pos_value:
+                    score += (log(pos_value, 2) ** 3.5) * mask[x][y]
                 left_pos = (x - 1, y)
                 right_pos = (x + 1, y)
                 up_pos = (x, y - 1)
                 down_pos = (x, y + 1)
                 left_value = grid.getCellValue(left_pos)
+                if left_value:
+                    left_value = log(left_value, 2)
                 right_value = grid.getCellValue(right_pos)
+                if right_value:
+                    right_value = log(right_value, 2)
                 up_value = grid.getCellValue(up_pos)
+                if up_value:
+                    up_value = log(up_value, 2)
                 down_value = grid.getCellValue(down_pos)
+                if down_value:
+                    down_value = log(down_value, 2)
+
                 if x > 0 and left_value:
                     penalty += abs(pos_value - left_value)
                 if x < 3 and right_value:
@@ -264,7 +276,7 @@ class PlayerAI(BaseAI):
                     penalty += abs(pos_value - up_value)
                 if y < 3 and down_value:
                     penalty += abs(pos_value - down_value)
-        return score - penalty
+        return score -  0.01 * penalty
 
     def iterativeDepth(self, grid):
         start = time.time()
