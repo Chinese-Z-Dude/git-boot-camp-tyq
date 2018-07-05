@@ -11,18 +11,18 @@ Author: Kelsey D'Souza
 
 This file contains two functions for visualizing 2-feature labeled datasets.
 Its purpose is to give you ideas on how to vizualize your data and use pandas
-and matplotlib, feel free to snippets of any code in here or import the file 
+and matplotlib, feel free to snippets of any code in here or import the file
 into your programs.
 
 This file *does not* need to be included in your submission unless imported.
 
 visualize_scatter
-	Assumes binary labels and creates a line between the data using the given 
-	feature and bias weights. 
+	Assumes binary labels and creates a line between the data using the given
+	feature and bias weights.
 	Note: weights should be input as [w1, w2, bias]
 
 visualize_3d
-	Plots data points in 3D space using feat1 x feat2 on the x-y base, and 
+	Plots data points in 3D space using feat1 x feat2 on the x-y base, and
 	label as the data point height along the z-axis.
 	It then creates a 3D surface plot of the continuous label model using
 	the given linear regressor weights.
@@ -41,7 +41,7 @@ def visualize_scatter(df, feat1=0, feat2=1, labels=2, weights=[-1, -1, 1],
           - feat1: column name of first feature
           - feat2: column name of second feature
           - labels: column name of labels
-          - weights: [w1, w2, b] 
+          - weights: [w1, w2, b]
     """
 
     # Draw color-coded scatter plot
@@ -76,8 +76,8 @@ def visualize_3d(df, lin_reg_weights=[1,1,1], feat1=0, feat2=1, labels=2,
                  xlim=(-1, 1), ylim=(-1, 1), zlim=(0, 3),
                  alpha=0., xlabel='age', ylabel='weight', zlabel='height',
                  title=''):
-    """ 
-    3D surface plot. 
+    """
+    3D surface plot.
     Main args:
       - df: dataframe with feat1, feat2, and labels
       - feat1: int/string column name of first feature
@@ -156,4 +156,3 @@ if __name__ == "__main__":
     visualize_3d(df, lin_reg_weights=lin_reg_weights,
                  feat1='feat1', feat2='feat2', labels='labels',
                  xlabel=col_names[0], ylabel=col_names[1], zlabel=col_names[2])
-
