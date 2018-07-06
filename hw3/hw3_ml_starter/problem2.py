@@ -3,9 +3,11 @@ import numpy as np
 import visualize as v
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import argparse
 
-alpha = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10]
+alpha = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10] # list of alpha value
 
+# training the linear model
 def train(X, y):
     result = np.zeros((len(alpha), 5))
     for i in xrange(len(alpha)):
@@ -16,14 +18,15 @@ def train(X, y):
             for k in xrange(len(w)):
                 w[k] = w[k] - (1.0 * alpha[i] / y.size) * sum(X[:, k] * err)
         # print "alpha is " + str(alpha[i]) + " " + str(w)
-        result[i][2: 5] = w
+        result[i][2: 5] = np.around(w, 3)
 
     result = pd.DataFrame(result)
     return result
     # print result
 
-def print_fet(df, w):
-    print w
+# visualize the linear model by each feature 
+def print_fet(df, r):
+    w = r[2:5]
     for i in xrange(2):
         ax = df.plot(x = i, y = 2, kind='scatter')
         xmin, xmax = ax.get_xlim()
@@ -33,13 +36,20 @@ def print_fet(df, w):
 
         line_start = (xmin, xmax)
         line_end = (y(xmin), y(xmax))
-        print xmin, xmax, y(xmin), y(xmax)
         line = mlines.Line2D(line_start, line_end, color='red')
         ax.add_line(line)
+        ax.set_title('alpha' + str(r[0]) + "feature" + str(i + 1))
         plt.show()
+        # plt.savefig('alpha' + str(r[0]) + "feature" + str(i + 1) + ".png")
 
 def main():
-    data = pd.read_csv("input2.csv", header = None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input')
+    parser.add_argument('output')
+    parser.add_argument('--visual', action = 'store_true')
+    args = parser.parse_args()
+
+    data = pd.read_csv(args.input, header = None)
     mat = data.values
 
     # normalized data
@@ -53,32 +63,16 @@ def main():
     X = np.ones((mat.shape[0], 3))
     X[:, 1 : ] = mat[:, 0 : 2]
     y = mat[:, 2]
+    r = train(X, y).values
 
-    # print X
-    #
-    # print y
+    # when alphs is 1 the model has best result thus choose it as the answer
+    r = np.append(r, [r[6]], axis = 0)
+    pd.DataFrame(r).to_csv(args.output, header = None, index = False)
 
-    result = train(X, y)
-
-    # print data[0]
-    # print data[1]
-    # ax = plt.figure().gca(projection='3d')
-    # plt.hold(True)
-    # ax.scatter(data[0], data[1], data[2])
-    # plt.show()
-
-    r = result.values
-    # print r
-    # print r
-    # print r[3]
-    # print r[3][2:5]
-    for i in xrange(len(alpha)):
-        print_fet(data, r[i][2:5])
-    # v.visualize_3d(data, lin_reg_weights = r[3][2:5],
-                   # xlim = (1, 9), ylim = (5, 45), zlim = (0.7, 1.5))
-
-    # for i in xrange(result.shape[0]):
-    #     v.visualize_3d(data, lin_reg_weights=result.iloc[i, :])
+    if args.visual:
+        for i in xrange(len(alpha)):
+            print_fet(data, r[i])
+            v.visualize_3d(data, lin_reg_weights = r[i][2:5], alpha = r[i][0])
 
 if __name__ == "__main__":
     main()
